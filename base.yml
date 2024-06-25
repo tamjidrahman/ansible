@@ -1,0 +1,78 @@
+- name: Setup ZSH, Oh-My-Zsh, and Neovim configuration
+  hosts: localhost
+  become: true
+
+  tasks:
+    - name: Gather OS specific facts
+      ansible.builtin.setup:
+
+    - name: Install ZSH
+      apt:
+        name: zsh
+      tags: &tags_for_zsh_tasks ["install", "productivity", "dotfiles", "zsh"]
+
+    - name: Change shell to zsh
+      shell: chsh -s $(which zsh)
+      tags: *tags_for_zsh_tasks
+
+    - name: Oh-My-Zsh
+      shell: curl -L https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh > ~/.oh-my-installer && chmod +x ~/.oh-my-installer && ~/.oh-my-installer
+      tags: *tags_for_zsh_tasks
+
+    - name: Install zsh-autosuggestions
+      ansible.builtin.git:
+        repo: "https://github.com/zsh-users/zsh-autosuggestions.git"
+        dest: "~/.oh-my-zsh/plugins/zsh-autosuggestions"
+      tags: *tags_for_zsh_tasks
+
+    - name: Add Neovim PPA for Ubuntu
+      ansible.builtin.apt_repository:
+        repo: ppa:neovim-ppa/unstable
+        state: present
+      when: ansible_facts['os_family'] == "Debian"
+
+    - name: Update apt package manager
+      ansible.builtin.apt:
+        update_cache: yes
+      when: ansible_facts['os_family'] == "Debian"
+
+    - name: Install Node.js and npm on Ubuntu
+      ansible.builtin.package:
+        name:
+          - nodejs
+          - npm
+        state: present
+      when: ansible_facts['os_family'] == "Debian"
+
+    - name: Install Node.js using Homebrew on macOS
+      ansible.builtin.package:
+        name: node
+        state: present
+        use: homebrew
+      when: ansible_facts['os_family'] == "Darwin"
+
+    - name: Install Neovim and ripgrep on all systems
+      ansible.builtin.package:
+        name:
+          - neovim
+          - ripgrep
+        state: present
+
+    - name: Cloning .dotfiles
+      ansible.builtin.git:
+        repo: "https://github.com/tamjidrahman/dotfiles"
+        dest: "{{ lookup('env', 'HOME') }}/dotfiles"
+        recursive: yes
+        update: yes
+        accept_hostkey: yes
+        version: main
+
+    - name: Create Neovim config directory
+      file:
+        path: "{{ lookup('env', 'HOME') }}/.config/nvim"
+        state: directory
+        mode: "0755"
+
+    - name: Install Neovim config
+      shell: "{{ lookup('env', 'HOME') }}/dotfiles/install_nvim.sh"
+      tags: *tags_for_zsh_tasks
