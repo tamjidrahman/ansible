@@ -1,4 +1,4 @@
-- name: Setup ZSH, Oh-My-Zsh, and Neovim configuration
+- name: Setup ZSH, Neovim, and .aliases
   hosts: localhost
   become: true
 
@@ -9,28 +9,23 @@
     - name: Install ZSH
       apt:
         name: zsh
-      tags: &tags_for_zsh_tasks ["install", "productivity", "dotfiles", "zsh"]
 
     - name: Change shell to zsh
       shell: chsh -s $(which zsh)
-      tags: *tags_for_zsh_tasks
 
     - name: Check that the somefile.conf exists
       stat:
         path: "{{ lookup('env', 'HOME') }}/.oh-my-zsh"
       register: oh_my_stats
-      tags: *tags_for_zsh_tasks
 
     - name: Oh-My-Zsh
       shell: curl -L https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh > ~/.oh-my-installer && chmod +x ~/.oh-my-installer && ~/.oh-my-installer
-      tags: *tags_for_zsh_tasks
       when: oh_my_stats.stat.exists == False
 
     - name: Install zsh-autosuggestions
       ansible.builtin.git:
         repo: "https://github.com/zsh-users/zsh-autosuggestions.git"
         dest: "~/.oh-my-zsh/plugins/zsh-autosuggestions"
-      tags: *tags_for_zsh_tasks
 
     - name: Add Neovim PPA for Ubuntu
       ansible.builtin.apt_repository:
@@ -58,12 +53,13 @@
         use: homebrew
       when: ansible_facts['os_family'] == "Darwin"
 
-    - name: Install Neovim and ripgrep on all systems
+    - name: install local packages
       ansible.builtin.package:
         name:
           - neovim
           - ripgrep
           - fzf
+          - tmux
         state: present
 
     - name: Cloning .dotfiles
@@ -83,13 +79,6 @@
 
     - name: Install Neovim config
       shell: "{{ lookup('env', 'HOME') }}/src/dotfiles/install_nvim.sh"
-      tags: *tags_for_zsh_tasks
-
-    - name: Install tmux
-      ansible.builtin.package:
-        name: tmux
-      tags: "tmux"
 
     - name: Install local dotfile config
       shell: "{{ lookup('env', 'HOME') }}/src/dotfiles/install_local.sh"
-      tags: *tags_for_zsh_tasks
