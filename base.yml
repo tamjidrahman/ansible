@@ -56,12 +56,13 @@
         name:
           - neovim
           - ripgrep
+          - fzf
         state: present
 
     - name: Cloning .dotfiles
       ansible.builtin.git:
         repo: "https://github.com/tamjidrahman/dotfiles"
-        dest: "{{ lookup('env', 'HOME') }}/dotfiles"
+        dest: "{{ lookup('env', 'HOME') }}/src/dotfiles"
         recursive: yes
         update: yes
         accept_hostkey: yes
@@ -74,5 +75,14 @@
         mode: "0755"
 
     - name: Install Neovim config
-      shell: "{{ lookup('env', 'HOME') }}/dotfiles/install_nvim.sh"
+      shell: "{{ lookup('env', 'HOME') }}/src/dotfiles/install_nvim.sh"
+      tags: *tags_for_zsh_tasks
+
+    - name: Install tmux
+      ansible.builtin.package:
+        name: tmux
+      tags: "tmux"
+
+    - name: Install local dotfile config
+      shell: "{{ lookup('env', 'HOME') }}/src/dotfiles/install_local.sh"
       tags: *tags_for_zsh_tasks
