@@ -60,6 +60,9 @@
           - ripgrep
           - fzf
           - tmux
+          - bat
+          - eza
+          - git-delta
         state: present
 
     - name: Cloning .dotfiles
@@ -82,3 +85,6 @@
 
     - name: Install local dotfile config
       shell: "{{ lookup('env', 'HOME') }}/src/dotfiles/install_local.sh"
+
+    - name: Install local bat config
+      shell: "{{ lookup('env', 'HOME') }}/src/dotfiles/install_bat.sh"
