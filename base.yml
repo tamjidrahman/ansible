@@ -91,11 +91,26 @@
     - name: Install local dotfile config
       shell: "{{ lookup('env', 'HOME') }}/src/dotfiles/install_local.sh"
 
-    - name: Install local bat config
+    # On Debian and Ubuntu, bat uses the batcat command by default because of a conflict with an existing package, bacula-console-qt
+    - name: Switch from bat to batcat on Ubuntu
+      lineinfile:
+        path: "{{ lookup('env', 'HOME') }}/.aliases"
+        search_string: 'alias cat="bat"'
+        line: 'alias cat="batcat"'
+      when: ansible_facts['os_family'] == "Debian"
+
+    - name: Switch bat to batcat on Ubuntu
+      lineinfile:
+        path: "{{ lookup('env', 'HOME') }}/src/dotfiles/install_bat.sh"
+        search_string: "bat cache --build"
+        line: "batcat cache --build"
+      when: ansible_facts['os_family'] == "Debian"
+      #
+    - name: Update bat themes
       shell: "{{ lookup('env', 'HOME') }}/src/dotfiles/install_bat.sh"
 
     # TODO: fix fzf keybindings for debian, currently this is turned off
-    - name: Ignore fzf key-bindings for apt-get
+    - name: Ignore fzf key-bindings for apt-get on Ubuntu
       lineinfile:
         path: "{{ lookup('env', 'HOME') }}/.zshrc"
         search_string: "(fzf --zsh)"
