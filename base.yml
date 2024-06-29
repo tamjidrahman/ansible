@@ -27,6 +27,11 @@
         repo: "https://github.com/zsh-users/zsh-autosuggestions.git"
         dest: "~/.oh-my-zsh/plugins/zsh-autosuggestions"
 
+    - name: Download fzf git
+      ansible.builtin.git:
+        repo: "https://github.com/junegunn/fzf-git.sh.git"
+        dest: "~/fzf-git.sh"
+
     - name: Add Neovim PPA for Ubuntu
       ansible.builtin.apt_repository:
         repo: ppa:neovim-ppa/unstable
@@ -88,3 +93,11 @@
 
     - name: Install local bat config
       shell: "{{ lookup('env', 'HOME') }}/src/dotfiles/install_bat.sh"
+
+    # TODO: fix fzf keybindings for debian, currently this is turned off
+    - name: Ignore fzf key-bindings for apt-get
+      lineinfile:
+        path: "{{ lookup('env', 'HOME') }}/.zshrc"
+        search_string: "(fzf --zsh)"
+        state: "absent"
+      when: ansible_facts['os_family'] == "Debian"
