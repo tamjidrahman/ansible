@@ -1,13 +1,12 @@
 - name: Setup ZSH, Neovim, and .aliases
   hosts: localhost
-  become: true
 
   tasks:
     - name: Gather OS specific facts
       ansible.builtin.setup:
 
     - name: Install ZSH
-      apt:
+      ansible.builtin.package:
         name: zsh
 
     - name: Change shell to zsh
