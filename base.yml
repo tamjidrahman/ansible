@@ -89,6 +89,7 @@
         stow -t {{ lookup('env', 'HOME') }} .
 
     # On Debian and Ubuntu, bat uses the batcat command by default because of a conflict with an existing package, bacula-console-qt
+    # TODO: just symlink bat to batcat
     - name: Switch from bat to batcat on Ubuntu
       lineinfile:
         path: "{{ lookup('env', 'HOME') }}/.aliases"
