@@ -68,6 +68,7 @@
           - bat
           - eza
           - git-delta
+          - stow
         state: present
 
     - name: Install tldr
@@ -82,17 +83,11 @@
         accept_hostkey: yes
         version: main
 
-    - name: Create Neovim config directory
-      file:
-        path: "{{ lookup('env', 'HOME') }}/.config/nvim"
-        state: directory
-        mode: "0755"
-
-    - name: Install Neovim config
-      shell: "{{ lookup('env', 'HOME') }}/src/dotfiles/install_nvim.sh"
-
-    - name: Install local dotfile config
-      shell: "{{ lookup('env', 'HOME') }}/src/dotfiles/install_local.sh"
+    - name: Stow dotfiles
+      shell: |
+        rm -rf {{ lookup('env', 'HOME') }}/.zshrc
+        cd {{ lookup('env', 'HOME') }}/src/dotfiles
+        stow -t {{ lookup('env', 'HOME') }} .
 
     # On Debian and Ubuntu, bat uses the batcat command by default because of a conflict with an existing package, bacula-console-qt
     - name: Switch from bat to batcat on Ubuntu
@@ -110,7 +105,9 @@
       when: ansible_facts['os_family'] == "Debian"
       #
     - name: Update bat themes
-      shell: "{{ lookup('env', 'HOME') }}/src/dotfiles/install_bat.sh"
+      shell: |
+        chmod +x {{ lookup('env', 'HOME') }}/src/dotfiles/install_bat.sh      
+        {{ lookup('env', 'HOME') }}/src/dotfiles/install_bat.sh
 
     # TODO: fix fzf keybindings for debian, currently this is turned off
     - name: Ignore fzf key-bindings for apt-get on Ubuntu
