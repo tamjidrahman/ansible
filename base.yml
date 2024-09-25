@@ -56,6 +56,19 @@
         state: present
         use: homebrew
       when: ansible_facts['os_family'] == "Darwin"
+    
+    - name: Install WezTerm cask
+      community.general.homebrew_cask:
+      name: WezTerm
+      state: present
+      when: ansible_facts['os_family'] == "Darwin"
+
+    - name: Install WezTerm using Homebrew on macOS
+      ansible.builtin.package:
+        name: wezterm
+        state: present
+        use: homebrew
+      when: ansible_facts['os_family'] == "Darwin"
 
     - name: install local packages
       ansible.builtin.package:
